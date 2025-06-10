@@ -9,7 +9,7 @@
 2. Скачайте все файлы проекта на свой компьютер.
 
 ```
-https://github.com/IrinaQA423/cosmos.git
+https://github.com/IrinaQA423/vacancy_stats.git
 ```
 
 3. Установите зависимости.
@@ -35,7 +35,6 @@ pip install -r requirements.txt
 ```sh
 python vacancy_stats.py 
 ```
-
 
 ### Цель проекта
 

@@ -4,7 +4,7 @@ import os
 import requests
 from dotenv import load_dotenv
 
-from print_tables import print_stats_table
+from generate_tables import generate_stats_table
 
 
 HH_API_AREA = 1
@@ -187,9 +187,9 @@ def main():
 
     output = [
         "\nСтатистика по вакансиям в Москве",
-        print_stats_table(hh_results, 'HeadHunter'),
+        generate_stats_table(hh_results, 'HeadHunter'),
         "",
-        print_stats_table(sj_results, 'SuperJob')
+        generate_stats_table(sj_results, 'SuperJob')
     ]
 
     print("\n".join(output))

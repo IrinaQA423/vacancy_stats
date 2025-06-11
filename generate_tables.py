@@ -1,7 +1,7 @@
 from terminaltables import AsciiTable
 
 
-def print_stats_table(results, title):
+def generate_stats_table(results, title):
     table_data = [[
         'Язык',
         'Найдено вакансий',

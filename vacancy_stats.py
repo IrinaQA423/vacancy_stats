@@ -10,9 +10,9 @@ def fetch_all_vacancies_hh(language):
     hh_url = 'https://api.hh.ru/vacancies' 
     all_vacancies = []
     page = 0
-    pages_number = 1
+    total_pages = 1
 
-    while page < pages_number:
+    while page < total_pages:
         params = {
             'text': f'программист {language}',
             'area': 1,
@@ -21,16 +21,16 @@ def fetch_all_vacancies_hh(language):
             'per_page': 100
         }
 
-        page_response = requests.get(hh_url, params=params)
-        page_response.raise_for_status()
-        page_payload = page_response.json()
+        response = requests.get(hh_url, params=params)
+        response.raise_for_status()
+        hh_api_response = response.json()
 
-        pages_number = page_payload['pages']
-        all_vacancies.extend(page_payload['items'])
+        total_pages = hh_api_response['pages']
+        all_vacancies.extend(hh_api_response['items'])
         page += 1
 
     return {
-        'found': page_payload.get('found', 0),
+        'found': hh_api_response.get('found', 0),
         'vacancies': all_vacancies
     }
 
@@ -40,7 +40,7 @@ def fetch_all_vacancies_sj(language, secret_key):
     all_vacancies = []
     page = 0
     more_pages = True
-    total = 0
+    total_vacancies = 0
 
     headers = {'X-Api-App-Id': secret_key}
 
@@ -57,29 +57,29 @@ def fetch_all_vacancies_sj(language, secret_key):
         response = requests.get(superjob_url, headers=headers,
                                 params=params, timeout=10)
         response.raise_for_status()
-        vacancies_data = response.json()
+        sj_api_response = response.json()
 
-        all_vacancies.extend(vacancies_data.get('objects', []))
+        all_vacancies.extend(sj_api_response.get('objects', []))
         if page == 0:
-            total = vacancies_data.get('total', 0)
-            more_pages = vacancies_data.get('more', False)
+            total_vacancies = sj_api_response.get('total', 0)
+            more_pages = sj_api_response.get('more', False)
 
         page += 1
 
     return {
-        'found': total,
+        'found': total_vacancies,
         'vacancies': all_vacancies
     }
 
 
-def process_hh_vacancies(vacancies_data):
+def process_hh_vacancies(hh_vacancies):
     #hh_url = 'https://api.hh.ru/vacancies' 
     #vacancies_data = fetch_all_vacancies_hh(language, hh_url)
-    if not vacancies_data or not vacancies_data.get('vacancies'):
+    if not hh_vacancies or not hh_vacancies.get('vacancies'):
         return None
 
     salaries = []
-    for vacancy in vacancies_data['vacancies']:
+    for vacancy in hh_vacancies['vacancies']:
 
         salary = predict_rub_salary_hh(vacancy)
         if salary:
@@ -88,20 +88,20 @@ def process_hh_vacancies(vacancies_data):
     avg_salary = int(mean(salaries)) if salaries else None
 
     return {
-        "vacancies_found": vacancies_data['found'],
+        "vacancies_found": hh_vacancies['found'],
         "vacancies_processed": len(salaries),
         "average_salary": avg_salary
     }
 
 
-def process_sj_vacancies(vacancies_data):
+def process_sj_vacancies(sj_vacancies):
     #superjob_url = 'https://api.superjob.ru/2.0/vacancies/'
     #vacancies_data = fetch_all_vacancies_sj(language, secret_key, superjob_url)
-    if not vacancies_data or not vacancies_data.get('vacancies'):
+    if not sj_vacancies or not sj_vacancies.get('vacancies'):
         return None
 
     salaries = []
-    for vacancy in vacancies_data['vacancies']:
+    for vacancy in sj_vacancies['vacancies']:
         salary = predict_rub_salary_sj(vacancy)
         if salary:
             salaries.append(salary)
@@ -109,7 +109,7 @@ def process_sj_vacancies(vacancies_data):
     avg_salary = int(mean(salaries)) if salaries else None
 
     return {
-        "vacancies_found": vacancies_data['found'],
+        "vacancies_found": sj_vacancies['found'],
         "vacancies_processed": len(salaries),
         "average_salary": avg_salary
     }
@@ -117,11 +117,11 @@ def process_sj_vacancies(vacancies_data):
 
 def predict_rub_salary(salary_from, salary_to):
 
-    if salary_from is not None and salary_to is not None:
+    if salary_from and salary_to:
         return (salary_from + salary_to) / 2
-    elif salary_from is not None:
+    elif salary_from:
         return salary_from * 1.2
-    elif salary_to is not None:
+    elif salary_to:
         return salary_to * 0.8
     return None
 
@@ -233,18 +233,18 @@ def main():
     hh_results = {}
 
     for lang in languages:
-        vacancies = fetch_all_vacancies_hh(lang)
-        stats = process_hh_vacancies(vacancies)
-        if stats:
-            hh_results[lang] = stats
+        hh_vacancies = fetch_all_vacancies_hh(lang)
+        hh_stats = process_hh_vacancies(hh_vacancies)
+        if hh_stats:
+            hh_results[lang] = hh_stats
 
     sj_results = {}
     for lang in languages:
-        vacancies = fetch_all_vacancies_sj(lang,sj_secret)
+        sj_vacancies = fetch_all_vacancies_sj(lang,sj_secret)
 
-        stats = process_sj_vacancies(vacancies)
-        if stats:
-            sj_results[lang] = stats
+        sj_stats = process_sj_vacancies(sj_vacancies)
+        if sj_stats:
+            sj_results[lang] = sj_stats
 
     output = [
         "\nСтатистика по вакансиям в Москве",

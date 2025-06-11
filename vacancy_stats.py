@@ -6,8 +6,8 @@ from terminaltables import AsciiTable
 from dotenv import load_dotenv
 
 
-def fetch_all_vacancies_hh(language, hh_url):
-
+def fetch_all_vacancies_hh(language):
+    hh_url = 'https://api.hh.ru/vacancies' 
     all_vacancies = []
     page = 0
     pages_number = 1
@@ -35,7 +35,8 @@ def fetch_all_vacancies_hh(language, hh_url):
     }
 
 
-def fetch_all_vacancies_sj(language, secret_key, superjob_url):
+def fetch_all_vacancies_sj(language, secret_key):
+    superjob_url = 'https://api.superjob.ru/2.0/vacancies/'
     all_vacancies = []
     page = 0
     more_pages = True
@@ -71,8 +72,9 @@ def fetch_all_vacancies_sj(language, secret_key, superjob_url):
     }
 
 
-def get_language_stats_hh(language, hh_url):
-    vacancies_data = fetch_all_vacancies_hh(language, hh_url)
+def process_hh_vacancies(vacancies_data):
+    #hh_url = 'https://api.hh.ru/vacancies' 
+    #vacancies_data = fetch_all_vacancies_hh(language, hh_url)
     if not vacancies_data or not vacancies_data.get('vacancies'):
         return None
 
@@ -92,9 +94,9 @@ def get_language_stats_hh(language, hh_url):
     }
 
 
-def get_language_stats_sj(language, secret_key, superjob_url):
-
-    vacancies_data = fetch_all_vacancies_sj(language, secret_key, superjob_url)
+def process_sj_vacancies(vacancies_data):
+    #superjob_url = 'https://api.superjob.ru/2.0/vacancies/'
+    #vacancies_data = fetch_all_vacancies_sj(language, secret_key, superjob_url)
     if not vacancies_data or not vacancies_data.get('vacancies'):
         return None
 
@@ -209,8 +211,8 @@ def print_hh_table(hh_results):
 def main():
     load_dotenv()
 
-    superjob_url = 'https://api.superjob.ru/2.0/vacancies/'
-    hh_url = 'https://api.hh.ru/vacancies'
+    #superjob_url = 'https://api.superjob.ru/2.0/vacancies/'
+    #hh_url = 'https://api.hh.ru/vacancies'
     sj_secret = os.getenv('SJ_SECRET_KEY')
 
     languages = [
@@ -227,17 +229,20 @@ def main():
         "Ruby",
         "1C"
     ]
-    sj_results = {}
+    
     hh_results = {}
 
     for lang in languages:
-        stats = get_language_stats_hh(lang, hh_url)
+        vacancies = fetch_all_vacancies_hh(lang)
+        stats = process_hh_vacancies(vacancies)
         if stats:
             hh_results[lang] = stats
 
+    sj_results = {}
     for lang in languages:
+        vacancies = fetch_all_vacancies_sj(lang,sj_secret)
 
-        stats = get_language_stats_sj(lang, sj_secret, superjob_url)
+        stats = process_sj_vacancies(vacancies)
         if stats:
             sj_results[lang] = stats
 
@@ -247,10 +252,9 @@ def main():
         "",
         print_sj_table(sj_results)
     ]
-    #print("\nСтатистика по вакансиям в Москве")
-    #print_hh_table(hh_results)
+    
     print("\n".join(output))
-    #print_sj_table(sj_results)
+    
 
 
 if __name__ == '__main__':

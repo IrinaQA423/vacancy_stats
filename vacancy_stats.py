@@ -5,6 +5,7 @@ import requests
 from terminaltables import AsciiTable
 from dotenv import load_dotenv
 
+
 HH_API_AREA = 1                  
 HH_API_PERIOD = 30                
 ITEMS_PER_PAGE = 100               
@@ -34,10 +35,8 @@ def fetch_all_vacancies_hh(language):
         all_vacancies.extend(hh_api_response['items'])
         page += 1
 
-    return {
-        'found': hh_api_response.get('found', 0),
-        'vacancies': all_vacancies
-    }
+    return hh_api_response.get('found', 0), all_vacancies
+    
 
 
 def fetch_all_vacancies_sj(language, secret_key):
@@ -71,20 +70,19 @@ def fetch_all_vacancies_sj(language, secret_key):
 
         page += 1
 
-    return {
-        'found': total_vacancies,
-        'vacancies': all_vacancies
-    }
+    return total_vacancies, all_vacancies
+    
 
 
-def process_hh_vacancies(hh_vacancies):
+def process_hh_vacancies(hh_result):
+    found, hh_vacancies = hh_result
     #hh_url = 'https://api.hh.ru/vacancies' 
     #vacancies_data = fetch_all_vacancies_hh(language, hh_url)
-    if not hh_vacancies or not hh_vacancies.get('vacancies'):
+    if not hh_vacancies:
         return None
 
     salaries = []
-    for vacancy in hh_vacancies['vacancies']:
+    for vacancy in hh_vacancies:
 
         salary = predict_rub_salary_hh(vacancy)
         if salary:
@@ -93,20 +91,21 @@ def process_hh_vacancies(hh_vacancies):
     avg_salary = int(mean(salaries)) if salaries else None
 
     return {
-        "vacancies_found": hh_vacancies['found'],
+        "vacancies_found": found,
         "vacancies_processed": len(salaries),
         "average_salary": avg_salary
     }
 
 
-def process_sj_vacancies(sj_vacancies):
+def process_sj_vacancies(sj_result):
+    found, sj_vacancies = sj_result
     #superjob_url = 'https://api.superjob.ru/2.0/vacancies/'
     #vacancies_data = fetch_all_vacancies_sj(language, secret_key, superjob_url)
-    if not sj_vacancies or not sj_vacancies.get('vacancies'):
+    if not sj_vacancies:
         return None
 
     salaries = []
-    for vacancy in sj_vacancies['vacancies']:
+    for vacancy in sj_vacancies:
         salary = predict_rub_salary_sj(vacancy)
         if salary:
             salaries.append(salary)
@@ -114,7 +113,7 @@ def process_sj_vacancies(sj_vacancies):
     avg_salary = int(mean(salaries)) if salaries else None
 
     return {
-        "vacancies_found": sj_vacancies['found'],
+        "vacancies_found": found,
         "vacancies_processed": len(salaries),
         "average_salary": avg_salary
     }

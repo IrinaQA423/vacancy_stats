@@ -68,7 +68,7 @@ def fetch_all_vacancies_sj(language, secret_key):
             total_vacancies = sj_api_response.get('total', 0)
             more_pages = sj_api_response.get('more', False)
 
-        page += 1
+            page += 1
 
     return total_vacancies, all_vacancies
     

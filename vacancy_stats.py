@@ -5,6 +5,11 @@ import requests
 from terminaltables import AsciiTable
 from dotenv import load_dotenv
 
+HH_API_AREA = 1                  
+HH_API_PERIOD = 30                
+ITEMS_PER_PAGE = 100               
+SJ_API_TOWN = 4                   
+SJ_API_CATALOGUE = 48             
 
 def fetch_all_vacancies_hh(language):
     hh_url = 'https://api.hh.ru/vacancies' 
@@ -15,10 +20,10 @@ def fetch_all_vacancies_hh(language):
     while page < total_pages:
         params = {
             'text': f'программист {language}',
-            'area': 1,
-            'period': 30,
+            'area': HH_API_AREA,
+            'period': HH_API_PERIOD,
             'page': page,
-            'per_page': 100
+            'per_page': ITEMS_PER_PAGE
         }
 
         response = requests.get(hh_url, params=params)
@@ -48,10 +53,10 @@ def fetch_all_vacancies_sj(language, secret_key):
         params = {
 
             'keyword': f'программист {language}',
-            'town': 4,
-            'catalogues': 48,
+            'town': SJ_API_TOWN,
+            'catalogues': SJ_API_CATALOGUE,
             'page': page,
-            'count': 100
+            'count': ITEMS_PER_PAGE
         }
 
         response = requests.get(superjob_url, headers=headers,

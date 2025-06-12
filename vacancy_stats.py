@@ -74,9 +74,8 @@ def fetch_all_vacancies_sj(language, secret_key):
     return total_vacancies, all_vacancies
 
 
-def process_hh_vacancies(hh_result):
-    found, hh_vacancies = hh_result
-
+def process_hh_vacancies(found, hh_vacancies):
+    
     if not hh_vacancies:
         return None
 
@@ -96,9 +95,8 @@ def process_hh_vacancies(hh_result):
     }
 
 
-def process_sj_vacancies(sj_result):
-    found, sj_vacancies = sj_result
-
+def process_sj_vacancies(found, sj_vacancies):
+    
     if not sj_vacancies:
         return None
 
@@ -175,13 +173,13 @@ def main():
     sj_results = {}
 
     for lang in languages:
-        hh_vacancies = fetch_all_vacancies_hh(lang)
-        hh_stats = process_hh_vacancies(hh_vacancies)
+        hh_found, hh_vacancies = fetch_all_vacancies_hh(lang)
+        hh_stats = process_hh_vacancies(hh_found, hh_vacancies)
         if hh_stats:
             hh_results[lang] = hh_stats
 
-        sj_vacancies = fetch_all_vacancies_sj(lang, sj_secret)
-        sj_stats = process_sj_vacancies(sj_vacancies)
+        sj_found, sj_vacancies = fetch_all_vacancies_sj(lang, sj_secret)
+        sj_stats = process_sj_vacancies(sj_found, sj_vacancies)
         if sj_stats:
             sj_results[lang] = sj_stats
 

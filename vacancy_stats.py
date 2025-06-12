@@ -74,7 +74,7 @@ def fetch_all_vacancies_sj(language, secret_key):
     return total_vacancies, all_vacancies
 
 
-def process_hh_vacancies(found, hh_vacancies):
+def calculate_hh_vacancies_stats(found, hh_vacancies):
     
     if not hh_vacancies:
         return None
@@ -95,7 +95,7 @@ def process_hh_vacancies(found, hh_vacancies):
     }
 
 
-def process_sj_vacancies(found, sj_vacancies):
+def calculate_sj_vacancies_stats(found, sj_vacancies):
     
     if not sj_vacancies:
         return None
@@ -127,13 +127,13 @@ def predict_rub_salary(salary_from, salary_to):
 
 
 def predict_rub_salary_hh(vacancy):
-    salary_data = vacancy.get('salary')
+    salary = vacancy.get('salary')
 
-    if not salary_data or salary_data.get('currency') != 'RUR':
+    if not salary or salary.get('currency') != 'RUR':
         return None
     return predict_rub_salary(
-        salary_data.get('from'),
-        salary_data.get('to')
+        salary.get('from'),
+        salary.get('to')
     )
 
 
@@ -174,12 +174,12 @@ def main():
 
     for lang in languages:
         hh_found, hh_vacancies = fetch_all_vacancies_hh(lang)
-        hh_stats = process_hh_vacancies(hh_found, hh_vacancies)
+        hh_stats = calculate_hh_vacancies_stats(hh_found, hh_vacancies)
         if hh_stats:
             hh_results[lang] = hh_stats
 
         sj_found, sj_vacancies = fetch_all_vacancies_sj(lang, sj_secret)
-        sj_stats = process_sj_vacancies(sj_found, sj_vacancies)
+        sj_stats = calculate_sj_vacancies_stats(sj_found, sj_vacancies)
         if sj_stats:
             sj_results[lang] = sj_stats
 

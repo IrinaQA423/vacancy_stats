@@ -64,9 +64,9 @@ def fetch_all_vacancies_sj(language, secret_key):
         response.raise_for_status()
         sj_api_response = response.json()
 
-        all_vacancies.extend(sj_api_response.get('objects', []))
         if page == 0:
             total_vacancies = sj_api_response.get('total', 0)
+            all_vacancies.extend(sj_api_response.get('objects', []))
             more_pages = sj_api_response.get('more', False)
 
             page += 1
@@ -75,7 +75,7 @@ def fetch_all_vacancies_sj(language, secret_key):
 
 
 def calculate_hh_vacancies_stats(found, hh_vacancies):
-    
+
     if not hh_vacancies:
         return None
 
@@ -96,7 +96,7 @@ def calculate_hh_vacancies_stats(found, hh_vacancies):
 
 
 def calculate_sj_vacancies_stats(found, sj_vacancies):
-    
+
     if not sj_vacancies:
         return None
 
